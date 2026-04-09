@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
 
@@ -32,5 +33,9 @@ app.get('/health', (req, res) => {
 });
 
 // Rutas API
+
+
+// Middleware para manejo de errores globales
+app.use(errorHandler);
 
 export default app;
