@@ -1,6 +1,13 @@
 'use strict';
 
 /**
+ * @module utils/response
+ * @description Este módulo centraliza y estandariza la forma en que la API envía respuestas JSON al cliente.
+ * Proporciona funciones auxiliares para enviar respuestas de éxito, paginadas y de error,
+ * asegurando un formato de respuesta consistente en toda la aplicación.
+ */
+
+/**
  * Envía una respuesta JSON estandarizada para operaciones exitosas.
  *
  * @param {import('express').Response} res - El objeto de respuesta de Express.

@@ -1,6 +1,14 @@
 'use strict';
 
 /**
+ * @module utils/error
+ * @description Este módulo define un conjunto de clases de error personalizadas que se extienden de la clase `Error` nativa.
+ * Estas clases representan errores operacionales específicos de la aplicación (por ejemplo, recurso no encontrado, acceso denegado)
+ * y permiten un manejo de errores más granular y consistente en toda la API, facilitando su captura
+ * en el middleware de errores.
+ */
+
+/**
  * Clase base para errores operacionales de la aplicación.
  * Los errores operacionales son errores previsibles que no indican un bug en el código,
  * como "recurso no encontrado" o "entrada inválida".
