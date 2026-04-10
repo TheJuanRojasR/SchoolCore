@@ -1,6 +1,6 @@
 'use strict';
 
-import { sendError } from '../utils/response.js';
+import { sendError } from '../utils';
 
 /**
  * @module middlewares/error
@@ -14,7 +14,7 @@ import { sendError } from '../utils/response.js';
  * 3. Errores de clave duplicada de MongoDB (código `11000`).
  * 4. Cualquier otro error no esperado (errores 500).
  *
- * @param {Error | import('../utils/error.js').AppError} err - El objeto de error. Puede ser un error estándar o una instancia de nuestras clases de error personalizadas.
+ * @param {Error | import('../utils').AppError} err - El objeto de error. Puede ser un error estándar o una instancia de nuestras clases de error personalizadas.
  * @param {import('express').Request} req - El objeto de solicitud de Express.
  * @param {import('express').Response} res - El objeto de respuesta de Express.
  * @param {import('express').NextFunction} next - La función para pasar al siguiente middleware (requerida por Express para los manejadores de errores).
