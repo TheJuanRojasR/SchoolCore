@@ -1,6 +1,6 @@
 'use strict';
 
-import { sendError } from '../utils';
+import { sendError } from '../utils/index.js';
 
 /**
  * @module middlewares/error

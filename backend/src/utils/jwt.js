@@ -7,10 +7,10 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { AppError } from './error.js';
+import { AppError } from './index.js';
 
 const ACCESS_SECRET = process.env.JWT_SECRET;
-const REFREST_SECRET = process.env.REFREST_SECRET;
+const REFREST_SECRET = process.env.REFRESH_SECRET;
 
 // Es crucial que las claves secretas estén definidas para que la aplicación pueda funcionar de forma segura.
 // Si no lo están, se lanza un error de configuración del servidor al iniciar la aplicación.
