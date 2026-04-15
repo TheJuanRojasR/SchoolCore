@@ -25,3 +25,16 @@ export async function refresh(req, res, next) {
         next(error)
     }
 }
+
+export async function logout(req, res, next) {
+    try {
+        // El middleware 'authenticate' ya ha verificado el accessToken y ha adjuntado el usuario a req.user
+        const { refreshToken } = req.body;
+        const user = req.user;
+
+        const result = await authService.logout(refreshToken, user, req);
+        sendSuccess(res, result);
+    } catch (error) {
+        next(error);
+    }
+}

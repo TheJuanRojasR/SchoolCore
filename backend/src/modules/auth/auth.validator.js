@@ -28,3 +28,11 @@ export const refreshSchema = Joi.object({
     }),
     }).required(),
 });
+
+export const logoutSchema = Joi.object({
+    body: Joi.object({
+        refreshToken: Joi.string().required().messages({
+            'any.required': 'El refreshToken es requerido para cerrar la sesión.',
+        }),
+    }).required(),
+});

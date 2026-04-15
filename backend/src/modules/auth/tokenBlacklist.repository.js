@@ -1,6 +1,6 @@
 'use strict';
 
-import { TokenBlacklist } from "./tokenBlacklist.model";
+import { TokenBlacklist } from "./tokenBlacklist.model.js";
 
 /**
  * Añade un nuevo token a la lista negra para invalidarlo.
