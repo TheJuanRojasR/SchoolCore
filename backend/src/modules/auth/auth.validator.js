@@ -15,8 +15,16 @@ export const loginSchema = Joi.object({
 
     headers: Joi.object({
         'x-tenant-id': Joi.string().required().messages({
-            'any.required': 'La cabecera x-tenant-id es requerida.',
-            'string.empty': 'La cabecera x-tenant-id no puede estar vacía.',
+            'any.required': 'La cabecera x-tenant-id es requerida',
+            'string.empty': 'La cabecera x-tenant-id no puede estar vacía',
         }),
     }).unknown(true), // Permite otras cabeceras que no estén definidas en el schema
+});
+
+export const refreshSchema = Joi.object({
+    body: Joi.object({
+        refreshToken: Joi.string().required().messages({
+        'any.required': 'El refreshToken es requerido',
+    }),
+    }).required(),
 });

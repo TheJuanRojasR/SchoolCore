@@ -1,8 +1,8 @@
 'use strict';
 
-import { findUserByEmail, updateUserLastLogin } from '../users/user.repository.js';
+import { findUserByEmail, updateUserLastLogin, findUserById } from '../users/user.repository.js';
 import { UnauthorizedError, ForbiddenError } from '../../utils/index.js';
-import { comparePassword } from '../../utils/index.js';
+import { comparePassword, verifyRefreshToken } from '../../utils/index.js';
 import { singAccessToken, singRefreshToken, ACCESS_TOKEN_EXPIRATION_IN_SECONDS } from '../../utils/index.js';
 
 // -------------------------------------------------------------------------------
@@ -60,5 +60,26 @@ export async function login(tenantId, email, password) {
             tenantId: user.tenantId,
         },
     };
+}
+// -------------------------------------------------------------------------------
+// 2. Funcion de validacion Refresh token
+export async function refresh(refreshToken) {
+    let payload;
+    try {
+        payload = verifyRefreshToken(refreshToken);
+    } catch (error) {
+        throw new UnauthorizedError('Token inválido o expirado');
+    }
+
+    const user = await findUserById(payload.userId);
+
+    if (!user || !user.isActive) {
+        throw new UnauthorizedError('Usuario no disponible')
+    }
+
+    const tokenPayload = buildTokenPayload(user);
+    const accessToken = singAccessToken(tokenPayload);
+
+    return { accessToken, expiresIn: ACCESS_TOKEN_EXPIRATION_IN_SECONDS };
 }
 // -------------------------------------------------------------------------------
