@@ -1,15 +1,21 @@
 'use strict';
 
 import * as authService from './auth.service.js';
+import { toLoginUserDTO, toUserProfileDTO } from '../users/user.dto.js';
+import { toTokenResponseDTO } from './auth.dto.js';
 import { sendSuccess } from '../../utils/index.js';
 
 export async function login(req, res, next) {
     try {
         const { email, password } = req.body;
         const tenantId = req.headers['x-tenant-id'];
-        
+
         const result = await authService.login(tenantId, email, password);
-        sendSuccess(res, result, 200)
+
+        // Transform user data to DTO in the controller
+        result.user = toLoginUserDTO(result.user);
+
+        sendSuccess(res, result, 200);
     } catch (error) {
         next(error)
     }
@@ -18,9 +24,10 @@ export async function login(req, res, next) {
 export async function refresh(req, res, next) {
     try {
         const { refreshToken } = req.body;
-        
-        const result = await authService.refresh(refreshToken);
-        sendSuccess(res, result);
+
+        const tokens = await authService.refresh(refreshToken);
+        const tokenDTO = toTokenResponseDTO(tokens.accessToken, tokens.refreshToken);
+        sendSuccess(res, tokenDTO);
     } catch (error) {
         next(error)
     }
@@ -70,9 +77,10 @@ export async function getProfile(req, res, next) {
     try {
         const userId = req.user.userId;
 
-        const result = await authService.getUserProfile(userId);
+        const userProfile = await authService.getUserProfile(userId);
+        const profileDTO = toUserProfileDTO(userProfile);
 
-        sendSuccess(res, result);
+        sendSuccess(res, profileDTO);
     } catch (error) {
         next(error);
     }

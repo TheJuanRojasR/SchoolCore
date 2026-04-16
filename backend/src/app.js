@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { errorHandler } from './middlewares/error.middleware.js';
 import authRoutes from './modules/auth/auth.routes.js';
+import tenantRoutes from './modules/tenants/tenant.routes.js';
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.get('/health', (req, res) => {
 
 // Rutas API
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/tenants', tenantRoutes);
 
 // Middleware para manejo de errores globales
 app.use(errorHandler);
