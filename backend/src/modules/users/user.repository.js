@@ -64,8 +64,12 @@ export function updatePasswordAndClearToken(userId, newPasswordHash) {
         passwordHash: newPasswordHash,
         'security.resetToken': null,
         'security.resetExpires': null,
-        // Opcional: Reiniciar contadores de bloqueo si existen
-        // failedAttempts: 0,
-        // lockedUntil: null,
     });
+}
+
+export function findProfileById(userId) {
+    return User.findById(userId)
+    .populate('personId', 'name document')
+    .populate('tenantId', 'name')
+    .lean()
 }

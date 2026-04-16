@@ -14,5 +14,6 @@ router.post('/refresh',validate(refreshSchema), controller.refresh);
 router.post('/logout', authenticate, validate(logoutSchema), controller.logout);
 router.post('/forgot-password', forgotPasswordLimiter, validate(forgotPasswordSchema), controller.forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), controller.resetPassword);
+router.get('/me', authenticate, controller.getProfile);
 
 export default router;

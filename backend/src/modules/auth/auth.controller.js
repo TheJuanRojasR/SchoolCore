@@ -65,3 +65,15 @@ export async function resetPassword(req, res, next) {
         next(error);
     }
 }
+
+export async function getProfile(req, res, next) {
+    try {
+        const userId = req.user.userId;
+
+        const result = await authService.getUserProfile(userId);
+
+        sendSuccess(res, result);
+    } catch (error) {
+        next(error);
+    }
+}

@@ -2,11 +2,12 @@
 
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { findUserByEmail, updateUserLastLogin, findUserById, saveResetToken, findUserByResetToken, updatePasswordAndClearToken } from '../users/user.repository.js';
+import { findUserByEmail, updateUserLastLogin, findUserById, saveResetToken, findUserByResetToken, updatePasswordAndClearToken, findProfileById } from '../users/user.repository.js';
+import { toUserProfileDTO, toLoginUserDTO } from '../users/user.dto.js';
+import { toTokenResponseDTO, toMessageResponseDTO } from './auth.dto.js';
 import * as tokenBlacklistRepository from './tokenBlackList.repository.js';
 import * as emailService from './email.service.js';
-import { UnauthorizedError, ForbiddenError } from '../../utils/index.js';
-import { TOKEN_INVALIDATION_REASONS } from '../../config/constants.js';
+import { UnauthorizedError, ForbiddenError, NotFoundError } from '../../utils/index.js';
 import { comparePassword, verifyRefreshToken, createHash, hashPassword } from '../../utils/index.js';
 import { singAccessToken, singRefreshToken, ACCESS_TOKEN_EXPIRATION_IN_SECONDS } from '../../utils/index.js';
 
@@ -57,13 +58,7 @@ export async function login(tenantId, email, password) {
         accessToken,
         refreshToken,
         expiresIn: ACCESS_TOKEN_EXPIRATION_IN_SECONDS,
-        user: {
-            id: user._id,
-            email: user.email,
-            roles: user.roles.map(role => role.name),
-            permissions: user.roles.flatMap(role => role.permissions),
-            tenantId: user.tenantId,
-        },
+        user: toLoginUserDTO(user),
     };
 }
 // -------------------------------------------------------------------------------
@@ -116,7 +111,7 @@ export async function refresh(refreshToken) {
         const newRefreshToken = singRefreshToken({ userId: user._id.toString() });
 
         // 4. Devolver los nuevos tokens. El cliente DEBE guardar el nuevo refreshToken.
-        return { accessToken: newAccessToken, refreshToken: newRefreshToken, expiresIn: ACCESS_TOKEN_EXPIRATION_IN_SECONDS };
+        return toTokenResponseDTO(newAccessToken, newRefreshToken);
 
     } catch (error) {
         if (error.isOperational) throw error;
@@ -243,5 +238,18 @@ export async function handleResetPassword(token, newPassword) {
     // 8. Registrar en auditoría (cuando se implemente)
     // auditService.log({ action: 'PASSWORD_RESET_COMPLETE', ... });
 
-    return { message: 'Tu contraseña ha sido actualizada exitosamente.' };
+    return toMessageResponseDTO('Tu contraseña ha sido actualizada exitosamente.');
+}
+// -------------------------------------------------------------------------------
+// 6. Funcion para traer los datos del usuario
+export async function getUserProfile(userId) {
+    
+    const user = await findProfileById(userId);
+
+    if (!user) {
+        throw new NotFoundError('Usuario no encontrado.');
+    }
+
+    // Se aplica la transformación para devolver solo los datos necesarios y seguros.
+    return toUserProfileDTO(user);
 }
