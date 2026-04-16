@@ -39,3 +39,33 @@ export function saveResetToken(userId, hashedToken, expirationDate) {
         'security.resetExpires': expirationDate,
     });
 }
+
+/**
+ * Busca un usuario por su token de recuperación de contraseña hasheado.
+ * Selecciona explícitamente los campos de seguridad y el hash de la contraseña actual.
+ * @param {string} hashedToken - El hash SHA-256 del token a buscar.
+ * @returns {Promise<object|null>} Una promesa que resuelve al objeto del usuario o `null` si no se encuentra.
+ */
+export function findUserByResetToken(hashedToken) {
+    return User.findOne({ 'security.resetToken': hashedToken })
+        .select('+passwordHash +security.resetToken +security.resetExpires')
+        .lean();
+}
+
+/**
+ * Actualiza la contraseña de un usuario e invalida su token de recuperación.
+ * Esta operación es atómica para garantizar la consistencia.
+ * @param {string} userId - El ID del usuario a actualizar.
+ * @param {string} newPasswordHash - El nuevo hash de la contraseña (usando bcrypt).
+ * @returns {Promise<object>} Una promesa que resuelve al documento del usuario actualizado.
+ */
+export function updatePasswordAndClearToken(userId, newPasswordHash) {
+    return User.findByIdAndUpdate(userId, {
+        passwordHash: newPasswordHash,
+        'security.resetToken': null,
+        'security.resetExpires': null,
+        // Opcional: Reiniciar contadores de bloqueo si existen
+        // failedAttempts: 0,
+        // lockedUntil: null,
+    });
+}

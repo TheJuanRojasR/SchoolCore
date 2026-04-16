@@ -19,3 +19,16 @@ export async function sendPasswordRecoveryLink(user, token, tenant) {
     console.log('------------------------------------');
     // En producción, aquí iría la lógica real de envío con `transporter.sendMail(...)`
 }
+
+/**
+ * Envía un correo de confirmación de cambio de contraseña.
+ * @param {object} user - El objeto del usuario destinatario.
+ */
+export async function sendPasswordChangeConfirmation(user) {
+    console.log('--- SIMULACIÓN DE ENVÍO DE CORREO ---');
+    console.log(`Para: ${user.email}`);
+    console.log(`Asunto: Confirmación de cambio de contraseña`);
+    console.log(`Hola ${user.person.name.first}, te confirmamos que la contraseña de tu cuenta ha sido actualizada exitosamente.`);
+    console.log('------------------------------------');
+    // En producción, aquí iría la lógica real de envío con `transporter.sendMail(...)`
+}

@@ -53,3 +53,15 @@ export async function forgotPassword(req, res, next) {
         next(error);
     }
 }
+
+export async function resetPassword(req, res, next) {
+    try {
+        const { token, password } = req.body;
+
+        const result = await authService.handleResetPassword(token, password);
+
+        sendSuccess(res, result);
+    } catch (error) {
+        next(error);
+    }
+}

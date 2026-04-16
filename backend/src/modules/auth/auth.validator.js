@@ -52,3 +52,20 @@ export const forgotPasswordSchema = Joi.object({
         }),
     }).unknown(true),
 });
+
+export const resetPasswordSchema = Joi.object({
+    body: Joi.object({
+        token: Joi.string().required().messages({
+            'any.required': 'El token de recuperación es requerido.',
+        }),
+        password: Joi.string()
+            .min(8)
+            .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$'))
+            .required()
+            .messages({
+                'string.min': 'La contraseña debe tener al menos 8 caracteres.',
+                'string.pattern.base': 'La contraseña debe contener al menos una mayúscula, un número y un carácter especial.',
+                'any.required': 'La nueva contraseña es requerida.',
+            }),
+    }).required(),
+});

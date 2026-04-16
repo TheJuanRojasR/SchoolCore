@@ -2,12 +2,12 @@
 
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { findUserByEmail, updateUserLastLogin, findUserById, saveResetToken } from '../users/user.repository.js';
+import { findUserByEmail, updateUserLastLogin, findUserById, saveResetToken, findUserByResetToken, updatePasswordAndClearToken } from '../users/user.repository.js';
 import * as tokenBlacklistRepository from './tokenBlackList.repository.js';
 import * as emailService from './email.service.js';
 import { UnauthorizedError, ForbiddenError } from '../../utils/index.js';
 import { TOKEN_INVALIDATION_REASONS } from '../../config/constants.js';
-import { comparePassword, verifyRefreshToken, createHash } from '../../utils/index.js';
+import { comparePassword, verifyRefreshToken, createHash, hashPassword } from '../../utils/index.js';
 import { singAccessToken, singRefreshToken, ACCESS_TOKEN_EXPIRATION_IN_SECONDS } from '../../utils/index.js';
 
 // -------------------------------------------------------------------------------
@@ -203,4 +203,45 @@ export async function handleForgotPassword(email, tenantId, req) {
         resetToken,
         simulatedTenant
     );
+}
+
+// -------------------------------------------------------------------------------
+// 5. Funcion para restablecer la contraseña
+export async function handleResetPassword(token, newPassword) {
+    // 1. Hashear el token recibido para buscarlo en la BD
+    const hashedToken = createHash(token);
+
+    // 2. Buscar al usuario por el token hasheado
+    const user = await findUserByResetToken(hashedToken);
+
+    // 3. Validar el token y al usuario
+    if (!user || new Date() > user.security.resetExpires) {
+        throw new UnauthorizedError('El token es inválido o ha expirado.');
+    }
+
+    if (!user.isActive) {
+        throw new ForbiddenError('La cuenta de usuario está desactivada.');
+    }
+
+    // 4. Validar que la nueva contraseña no sea igual a la anterior
+    const isSamePassword = await comparePassword(newPassword, user.passwordHash);
+    if (isSamePassword) {
+        throw new ForbiddenError('La nueva contraseña no puede ser igual a la anterior.');
+    }
+
+    // 5. Hashear la nueva contraseña para guardarla
+    const newPasswordHash = await hashPassword(newPassword);
+
+    // 6. Actualizar la contraseña e invalidar el token en una sola operación
+    await updatePasswordAndClearToken(user._id, newPasswordHash);
+
+    // 7. Enviar correo de confirmación (tarea asíncrona)
+    // Para este ejemplo, simularemos esos datos.
+    const simulatedPerson = { name: { first: 'Usuario' } }; // En un caso real, se buscaría la persona.
+    emailService.sendPasswordChangeConfirmation({ ...user, person: simulatedPerson });
+
+    // 8. Registrar en auditoría (cuando se implemente)
+    // auditService.log({ action: 'PASSWORD_RESET_COMPLETE', ... });
+
+    return { message: 'Tu contraseña ha sido actualizada exitosamente.' };
 }
