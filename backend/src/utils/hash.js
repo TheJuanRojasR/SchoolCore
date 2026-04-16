@@ -7,6 +7,7 @@
  */
 
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
 
@@ -31,4 +32,14 @@ export function hashPassword(password) {
  */
 export function comparePassword(password, hash) {
     return bcrypt.compare(password, hash);
+}
+
+/**
+ * Crea un hash SHA-256 de un string.
+ * Se utiliza para almacenar de forma segura los tokens de recuperación de contraseña.
+ * @param {string} token - El token en texto plano.
+ * @returns {string} El hash del token en formato hexadecimal.
+ */
+export function createHash(token) {
+    return crypto.createHash('sha256').update(token).digest('hex');
 }

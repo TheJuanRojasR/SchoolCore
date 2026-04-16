@@ -38,3 +38,18 @@ export async function logout(req, res, next) {
         next(error);
     }
 }
+
+export async function forgotPassword(req, res, next) {
+    try {
+        const { email } = req.body;
+        const tenantId = req.headers['x-tenant-id'];
+
+        // La llamada al servicio se hace, pero no se espera (await) intencionadamente
+        // para responder inmediatamente al cliente. El proceso sigue en segundo plano.
+        authService.handleForgotPassword(email, tenantId, req);
+
+        sendSuccess(res, { message: 'Si tu correo está registrado, recibirás un enlace para recuperar tu contraseña.' });
+    } catch (error) {
+        next(error);
+    }
+}

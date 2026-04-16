@@ -1,11 +1,13 @@
 'use strict';
 
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { findUserByEmail, updateUserLastLogin, findUserById } from '../users/user.repository.js';
+import { findUserByEmail, updateUserLastLogin, findUserById, saveResetToken } from '../users/user.repository.js';
 import * as tokenBlacklistRepository from './tokenBlackList.repository.js';
+import * as emailService from './email.service.js';
 import { UnauthorizedError, ForbiddenError } from '../../utils/index.js';
 import { TOKEN_INVALIDATION_REASONS } from '../../config/constants.js';
-import { comparePassword, verifyRefreshToken } from '../../utils/index.js';
+import { comparePassword, verifyRefreshToken, createHash } from '../../utils/index.js';
 import { singAccessToken, singRefreshToken, ACCESS_TOKEN_EXPIRATION_IN_SECONDS } from '../../utils/index.js';
 
 // -------------------------------------------------------------------------------
@@ -148,8 +150,8 @@ export async function logout(refreshToken, user, req) {
     // 4. Construir el objeto para la lista negra
     const blacklistEntry = {
         token: refreshToken,
-        userId: user.userId,
-        tenantId: user.tenantId,
+        userId: decoded.userId, // Principio de la fuente única: usar el ID del token que se está invalidando.
+        tenantId: user.tenantId, // El tenantId se puede seguir tomando del accessToken verificado para consistencia.
         expiresAt: new Date(decoded.exp * 1000), // El payload 'exp' está en segundos, se convierte a milisegundos para el objeto Date
         metadata: {
             ip: req.ip,
@@ -162,4 +164,43 @@ export async function logout(refreshToken, user, req) {
     tokenBlacklistRepository.add(blacklistEntry);
 
     return { message: 'Sesión cerrada exitosamente.' };
+}
+
+// -------------------------------------------------------------------------------
+// 4. Funcion para solicitar recuperacion de contraseña
+export async function handleForgotPassword(email, tenantId, req) {
+    // 1. Buscar al usuario de forma segura
+    const user = await findUserByEmail(tenantId, email);
+
+    // 2. Validación silenciosa: si el usuario no existe o no está activo, no hacer nada.
+    // Esto previene la enumeración de usuarios.
+    if (!user || !user.isActive) {
+        return;
+    }
+
+    // --- Si el usuario es válido, proceder ---
+
+    // 3. Generar un token criptográficamente seguro para el usuario
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // 4. Hashear el token para almacenarlo en la base de datos (nunca guardar en texto plano)
+    const hashedToken = createHash(resetToken);
+
+    // 5. Establecer la fecha de expiración (15 minutos desde ahora)
+    const expirationDate = new Date(Date.now() + 15 * 60 * 1000);
+
+    // 6. Guardar el token hasheado y la expiración en el documento del usuario
+    await saveResetToken(user._id, hashedToken, expirationDate);
+
+    // 7. Enviar el correo con el token en texto plano (tarea asíncrona)
+    // Se asume que el objeto 'user' tiene la información de 'person' y 'tenant' populada o se puede buscar.
+    // Para este ejemplo, simularemos esos datos.
+    const simulatedTenant = { name: 'Colegio de Prueba' }; // En un caso real, se buscaría el tenant.
+    const simulatedPerson = { name: { first: 'Usuario' } }; // En un caso real, se buscaría la persona.
+    
+    emailService.sendPasswordRecoveryLink(
+        { ...user, person: simulatedPerson },
+        resetToken,
+        simulatedTenant
+    );
 }

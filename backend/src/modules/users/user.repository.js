@@ -25,3 +25,17 @@ export function updateUserLastLogin(userId) {
 export function findUserById(id) {
     return User.findById(id).lean();
 }
+
+/**
+ * Guarda el token de recuperación de contraseña y su fecha de expiración para un usuario.
+ * @param {string} userId - El ID del usuario.
+ * @param {string} hashedToken - El hash SHA-256 del token.
+ * @param {Date} expirationDate - La fecha y hora en que el token expira.
+ * @returns {Promise<object>} Una promesa que resuelve al documento del usuario actualizado.
+ */
+export function saveResetToken(userId, hashedToken, expirationDate) {
+    return User.findByIdAndUpdate(userId, {
+        'security.resetToken': hashedToken,
+        'security.resetExpires': expirationDate,
+    });
+}

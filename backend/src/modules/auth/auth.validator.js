@@ -36,3 +36,19 @@ export const logoutSchema = Joi.object({
         }),
     }).required(),
 });
+
+export const forgotPasswordSchema = Joi.object({
+    body: Joi.object({
+        email: Joi.string().email().required().messages({
+            'string.email': 'El email no tiene un formato válido.',
+            'any.required': 'El email es requerido.',
+        }),
+    }).required(),
+
+    headers: Joi.object({
+        'x-tenant-id': Joi.string().required().messages({
+            'any.required': 'La cabecera x-tenant-id es requerida.',
+            'string.empty': 'La cabecera x-tenant-id no puede estar vacía.',
+        }),
+    }).unknown(true),
+});

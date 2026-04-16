@@ -36,6 +36,17 @@ const userSchema = new Schema({
         type: Date,
         default: null
     },
+    security: {
+        resetToken: {
+            type: String,
+            select: false,
+        },
+        resetExpires: {
+            type: Date,
+            select: false,
+        },
+        _id: false,
+    },
     roles: [{
         roleId: {
             type: Schema.Types.ObjectId,
