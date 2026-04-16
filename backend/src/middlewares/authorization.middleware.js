@@ -8,23 +8,27 @@ import { ForbiddenError } from '../utils/index.js';
  */
 
 /**
- * Crea un middleware de autorización que verifica los permisos del usuario.
- * @param {Array<string>} requiredRoles - Un array de nombres de roles requeridos. Ej: ['SUPERADMIN', 'RECTOR']
+ * Crea un middleware de autorización basado en permisos (recurso y acción).
+ * @param {string} requiredResource - El nombre del recurso que se quiere proteger (ej: 'tenants', 'students').
+ * @param {string} requiredAction - La acción que se quiere realizar sobre el recurso (ej: 'CREATE', 'READ').
  * @returns {function} El middleware de Express.
  */
-export function authorize(requiredRoles) {
+export function authorize(requiredResource, requiredAction) {
     return (req, res, next) => {
-        // Se asume que el middleware 'authenticate' ya se ejecutó y tenemos req.user
-        const userRoles = req.user?.roles || [];
+        // Se asume que el middleware 'authenticate' ya se ejecutó y tenemos req.user con sus permisos.
+        const userPermissions = req.user?.permissions || [];
 
-        // Comprueba si el usuario tiene al menos uno de los roles requeridos.
-        const hasRequiredRole = userRoles.some(role => requiredRoles.includes(role));
+        // Filtra todos los permisos que coincidan con el recurso solicitado o si tiene acceso global ('all')
+        const permissionsForResource = userPermissions.filter(p => p.resource === requiredResource || p.resource === 'all');
 
-        if (!hasRequiredRole) {
-            throw new ForbiddenError('No tienes los permisos necesarios para acceder a este recurso.');
+        // Verifica si en alguno de esos permisos está la acción requerida
+        const hasAction = permissionsForResource.some(p => p.actions.includes(requiredAction));
+
+        if (!hasAction) {
+            throw new ForbiddenError('No tienes permiso para realizar esta acción.');
         }
 
-        // Si tiene el rol, puede continuar.
+        // Si la validación es exitosa, el usuario puede continuar.
         next();
     };
 }

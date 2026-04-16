@@ -58,8 +58,15 @@ const userSchema = new Schema({
             required: true
         },
         permissions: [{
-            type: String,
-            required: true // Snapshot para evitar lookups en cada request
+            resource: {
+                type: String,
+                required: true
+            },
+            actions: [{
+                type: String,
+                required: true
+            }],
+            _id: false
         }],
         assignedAt: {
             type: Date,

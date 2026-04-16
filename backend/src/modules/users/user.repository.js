@@ -10,7 +10,11 @@ import { User } from './user.model.js';
  * @returns {Promise<object|null>} Una promesa que resuelve al objeto del usuario encontrado (incluyendo `passwordHash`) o `null` si no se encuentra.
  */
 export function findUserByEmail(tenantId, email) {
-    return User.findOne({ tenantId, email }).select('+passwordHash').lean();
+    return User.findOne({ tenantId, email })
+        .select('+passwordHash')
+        // Popula los roles y, dentro de cada rol, selecciona solo el nombre y los permisos.
+        .populate({ path: 'roles', select: 'name permissions' })
+        .lean();
 }
 
 /**

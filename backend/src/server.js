@@ -9,6 +9,7 @@ import connectDB from './config/database.js';
 
 import './modules/tenants/tenant.model.js'; // Importar el modelo Tenant
 import './modules/persons/person.model.js';
+import './modules/roles/role.model.js'; // Importar el modelo Role
 
 const PORT = process.env.PORT || 3000;
 

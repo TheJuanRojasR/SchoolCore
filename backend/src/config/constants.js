@@ -30,14 +30,9 @@ export const CALENDARS = Object.freeze(['A', 'B']);
 
 export const SHIFTS = Object.freeze(['MAÑANA', 'TARDE', 'NOCHE', 'UNICA', 'SABATINA']);
 
-export const ROLES = Object.freeze([
-    'SUPERADMIN',
-    'RECTOR',
-    'COORDINADOR',
-    'DOCENTE',
-    'ACUDIENTE',
-    'ESTUDIANTE',
-]);
+export const SYSTEM_ROLES = ['SUPERADMIN', 'RECTOR', 'COORDINADOR', 'SECRETARIA', 'DOCENTE', 'ACUDIENTE', 'ESTUDIANTE'];
+
+export const PERMISSION_ACTIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE'];
 
 export const STUDENT_STATUSES = Object.freeze(['ACTIVO', 'RETIRADO', 'EGRESADO']);
 

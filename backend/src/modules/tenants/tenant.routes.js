@@ -12,7 +12,7 @@ const router = Router();
 router.post(
     '/',
     authenticate,
-    authorize(['SUPERADMIN']),
+    authorize('tenants', 'CREATE'), // Ahora verificamos el permiso específico
     validate(createTenantSchema),
     controller.createTenant);
 
