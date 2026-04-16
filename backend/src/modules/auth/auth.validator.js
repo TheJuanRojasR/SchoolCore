@@ -5,11 +5,11 @@ import Joi from 'joi';
 export const loginSchema = Joi.object({
     body: Joi.object({
         email: Joi.string().email().required().messages({
-            'string.email': 'El email no tiene un formato válido',
-            'any.required': 'El email es requerido',
+            'string.email': 'El email no tiene un formato válido.',
+            'any.required': 'El email es requerido.',
         }),
         password: Joi.string().required().messages({
-            'any.required': 'La contraseña es requerida',
+            'any.required': 'La contraseña es requerida.',
         }),
     }).required(),
 
@@ -24,7 +24,7 @@ export const loginSchema = Joi.object({
 export const refreshSchema = Joi.object({
     body: Joi.object({
         refreshToken: Joi.string().required().messages({
-        'any.required': 'El refreshToken es requerido',
+        'any.required': 'El refreshToken es requerido.',
     }),
     }).required(),
 });
