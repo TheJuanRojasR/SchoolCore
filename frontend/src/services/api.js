@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
-const TENANT_ID = import.meta.env.VITE_TENANT_ID || 'default-tenant'; // Ajusta esto si el backend requiere un tenant específico
+const TENANT_ID = '69e147932a17bafc725aa2b1'; // Ajusta esto si el backend requiere un tenant específico
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'x-tenant-id': TENANT_ID, 
+    'x-tenant-id': TENANT_ID,
   },
 });
 
