@@ -2,7 +2,6 @@
 
 import mongoose from 'mongoose';
 import { SYSTEM_ROLES, PERMISSION_ACTIONS } from '../../config/constants.js';
-
 const { Schema } = mongoose;
 
 const permissionSchema = new Schema({

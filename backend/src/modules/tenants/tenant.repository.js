@@ -2,6 +2,10 @@
 
 import { Tenant } from "./tenant.model.js";
 
+export function findTenantById(tenantId) {
+    return Tenant.findById(tenantId).lean();
+}
+
 export function findTenantByNit(nitNumber) {
     return Tenant.findOne({ 'nit.number': nitNumber }).lean();
 }

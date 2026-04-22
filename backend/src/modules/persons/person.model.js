@@ -2,8 +2,9 @@
 
 import mongoose from 'mongoose';
 import { DOC_TYPES, GENDERS, ETHNICITIES, BLOOD_TYPES } from '../../config/constants.js';
+const { Schema } = mongoose;
 
-const personSchema = new mongoose.Schema({
+const personSchema = new Schema({
     tenantId: {
         type: mongoose.Schema.ObjectId,
         ref: 'Tenant',
