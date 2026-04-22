@@ -3,6 +3,7 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { findUserByEmail, updateUserLastLogin, findUserById, saveResetToken, findUserByResetToken, updatePasswordAndClearToken, findProfileById } from '../users/user.repository.js';
+import { findTenantById } from '../tenants/tenant.repository.js'
 import * as tokenBlacklistRepository from './tokenBlackList.repository.js';
 import * as emailService from './email.service.js';
 import { UnauthorizedError, ForbiddenError, NotFoundError } from '../../utils/index.js';
@@ -24,20 +25,28 @@ function buildTokenPayload(user) {
 // 1. Funcion login
 export async function login(tenantId, email, password) {
 
-    // 1. Buscar Usuario
-    const user = await findUserByEmail(tenantId, email);
+    // 1. Buscar el usuario y el tenant en paralelo para optimizar el tiempo de respuesta en el "happy path" (login exitoso).
+    const [user, tenant] = await Promise.all([
+        findUserByEmail(tenantId, email),
+        findTenantById(tenantId)
+    ]);
 
-    // 2. Verifica si el usuario existe
-    if (!user) {
+    // 2. Realizar las validaciones en orden de "fail-fast".
+    // Primero, las más probables o las que no dependen de otros datos.
+    if (!user || !tenant) {
         throw new UnauthorizedError('Credenciales incorrectas.');
     }
 
-    // 3. Verifica si la cuenta esta activa
+    // 3. Verificar estados. Si alguna de estas falla, se ahorra la comparación de la contraseña.
     if (!user.isActive) {
         throw new ForbiddenError('Cuenta deshabilitada.');
     }
 
-    // 4. Verifica contraseña
+    if (!tenant.isActive) {
+        throw new ForbiddenError('Institucion deshabilitada.');
+    }
+
+    // 4. Verificar contraseña (operación costosa en CPU, se deja para el final).
     const passwordOk = await comparePassword(password, user.passwordHash);
 
     if (!passwordOk) {
@@ -78,12 +87,10 @@ export async function refresh(refreshToken) {
             throw new UnauthorizedError('Usuario no disponible.');
         }
 
-        /* DEUDA TÉCNICA: Validación de Tenant
-        */
-        // const tenant = await findTenantById(user.tenantId); 
-        // if (!tenant || !tenant.isActive) {
-        //     throw new UnauthorizedError('La institución educativa no está activa');
-        // }
+        const tenant = await findTenantById(user.tenantId); 
+        if (!tenant || !tenant.isActive) {
+            throw new UnauthorizedError('La institución educativa no está activa');
+        }
 
         // 2. Invalidar el token de refresco que se acaba de usar, añadiéndolo a la lista negra.
         const decodedOldToken = jwt.decode(refreshToken);
